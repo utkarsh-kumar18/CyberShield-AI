@@ -2,6 +2,9 @@ import os
 import joblib
 
 from flask import Blueprint, request, jsonify
+from extensions import db
+from models.scan import Scan
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
 message_scanner = Blueprint(
@@ -30,6 +33,7 @@ model = joblib.load(MODEL_PATH)
     "/message",
     methods=["POST"]
 )
+@jwt_required()
 def scan_message():
 
     data = request.get_json()
@@ -83,19 +87,25 @@ def scan_message():
             "by the current AI model."
         )
 
+    user_id = get_jwt_identity()
+
+    scan = Scan(
+        user_id=user_id,
+        scan_type="message",
+        target=message,
+        result=status
+    )
+
+    db.session.add(scan)
+    db.session.commit()
+
     return jsonify({
-
         "status": status,
-
         "message": message,
-
         "prediction": prediction,
-
         "confidence": round(
             confidence,
             2
         ),
-
         "result": result_message
-
     }), 200

@@ -52,8 +52,7 @@ def get_reports():
                 "amount": float(report.amount or 0),
                 "suspicious_url": report.suspicious_url,
                 "status": report.status,
-                "created_at":
-                    report.created_at.isoformat()
+                "created_at": report.created_at.isoformat() + "Z"
                     if report.created_at
                     else None
             })

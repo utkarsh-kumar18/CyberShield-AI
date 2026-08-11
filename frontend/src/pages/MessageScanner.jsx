@@ -18,16 +18,16 @@ function MessageScanner() {
         setResult(null);
 
         try {
+            const token = localStorage.getItem("token");
 
             const response = await fetch(
                 "http://127.0.0.1:5000/api/scan/message",
                 {
                     method: "POST",
-
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
                     },
-
                     body: JSON.stringify({
                         message: message.trim()
                     })

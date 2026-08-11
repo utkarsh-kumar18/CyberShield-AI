@@ -5,6 +5,9 @@ import requests
 from flask import Blueprint, request, jsonify
 from urllib.parse import urlparse
 from dotenv import load_dotenv
+from extensions import db
+from models.scan import Scan
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
 load_dotenv()
@@ -15,6 +18,7 @@ VIRUSTOTAL_URL = "https://www.virustotal.com/api/v3"
 
 
 @scanner.route("/url", methods=["POST"])
+@jwt_required()
 def scan_url():
 
     data = request.get_json()
@@ -297,6 +301,18 @@ def scan_url():
                 "VirusTotal analysis is still processing."
             )
 
+        user_id = get_jwt_identity()
+
+        scan = Scan(
+            user_id=user_id,
+            scan_type="url",
+            target=url,
+            result=threat_status
+        )
+
+        db.session.add(scan)
+        db.session.commit()    
+
         return jsonify({
 
             "status": threat_status,
@@ -339,3 +355,30 @@ def scan_url():
             "url": url,
             "message": "An unexpected scanner error occurred."
         }), 500
+
+@scanner.route("/my-scans", methods=["GET"])
+@jwt_required()
+def my_scans():
+
+    user_id = get_jwt_identity()
+
+    scans = Scan.query.filter_by(
+        user_id=user_id
+    ).order_by(
+        Scan.created_at.desc()
+    ).all()
+
+    return jsonify({
+        "status": "success",
+        "count": len(scans),
+        "scans": [
+            {
+                "id": scan.id,
+                "scan_type": scan.scan_type,
+                "target": scan.target,
+                "result": scan.result,
+                "created_at": scan.created_at.isoformat()
+            }
+            for scan in scans
+        ]
+    }), 200

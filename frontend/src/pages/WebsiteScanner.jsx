@@ -18,6 +18,7 @@ function WebsiteScanner() {
         setResult(null);
 
         try {
+            const token = localStorage.getItem("token")
 
             const response = await fetch(
                 "http://127.0.0.1:5000/api/scan/url",
@@ -25,7 +26,8 @@ function WebsiteScanner() {
                     method: "POST",
 
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
                     },
 
                     body: JSON.stringify({
@@ -39,7 +41,6 @@ function WebsiteScanner() {
             setResult(data);
 
         } catch (error) {
-
             console.error(error);
 
             setResult({
@@ -123,9 +124,7 @@ function WebsiteScanner() {
                             border: "1px solid #ddd"
                         }}
                     >
-                        <h3>
-                            Threat Status
-                        </h3>
+                        <h3>Threat Status</h3>
 
                         <h2>
                             {result.status === "safe" && "🟢 SAFE"}

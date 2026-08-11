@@ -1,13 +1,74 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
 function Dashboard() {
 
     const navigate = useNavigate();
+    const [reports, setReports] = useState([]);
+    const [totalScans, setTotalScans] = useState(0);
+    const [threatsDetected, setThreatsDetected] = useState(0);
 
     const user = JSON.parse(
         localStorage.getItem("user")
     );
+
+    useEffect(() => {
+
+        const token = localStorage.getItem("token");
+
+        fetch("http://127.0.0.1:5000/api/fraud/my-reports", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.status === "success") {
+                    console.log("Reports:", data.reports);
+                    setReports(data.reports);
+                }
+            })
+            .catch((error) => {
+                console.error("Failed to load reports:", error);
+            });
+
+        fetch("http://127.0.0.1:5000/api/scan/my-scans", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.status === "success") {
+
+                    // Total scans
+                    setTotalScans(data.count);
+
+                    // Count detected threats
+                    const threats = data.scans.filter((scan) => {
+                        const result = String(scan.result).toLowerCase();
+
+                        return (
+                            result === "malicious" ||
+                            result === "suspicious" ||
+                            result === "scam"
+                        );
+                    });
+
+                    setThreatsDetected(threats.length);
+                }
+            })
+            .catch((error) => {
+                console.error("Failed to load scans:", error);
+            });
+
+    }, []);
+
+    const reportsCount = reports.length;
+    const threatsCount = reports.filter(
+        (report) => report.status !== "resolved"
+    ).length;
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -50,6 +111,10 @@ function Dashboard() {
 
                     <button onClick={() => navigate("/safety-tips")}>
                         🛡️ Safety Tips
+                    </button>
+
+                    <button onClick={() =>  navigate("/my-scans")}>
+                        🔍 Scan History
                     </button>
 
                 </nav>
@@ -128,7 +193,7 @@ function Dashboard() {
                     <div className="stat-card">
                         <span>🔍</span>
                         <div>
-                            <h3>0</h3>
+                            <h3>{totalScans}</h3>
                             <p>Total Scans</p>
                         </div>
                     </div>
@@ -136,7 +201,7 @@ function Dashboard() {
                     <div className="stat-card">
                         <span>⚠️</span>
                         <div>
-                            <h3>0</h3>
+                            <h3>{threatsDetected}</h3>
                             <p>Threats Detected</p>
                         </div>
                     </div>
@@ -144,7 +209,7 @@ function Dashboard() {
                     <div className="stat-card">
                         <span>🚨</span>
                         <div>
-                            <h3>0</h3>
+                            <h3>{reportsCount}</h3>
                             <p>Reports Submitted</p>
                         </div>
                     </div>
@@ -152,7 +217,11 @@ function Dashboard() {
                     <div className="stat-card">
                         <span>🛡️</span>
                         <div>
-                            <h3>Safe</h3>
+                            <h3>
+                                {threatsDetected > 0 
+                                ? "Threat Detected" 
+                                : "Safe"}
+                            </h3>
                             <p>Current Status</p>
                         </div>
                     </div>

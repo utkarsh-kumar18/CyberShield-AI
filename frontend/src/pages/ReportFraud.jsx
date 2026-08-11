@@ -26,10 +26,47 @@ function ReportFraud() {
             return;
         }
 
+        if (!fraudType.trim()) {
+            setResult({
+                status: "error",
+                message: "Please select a fraud type."
+            });
+            return;
+        }
+
+        if (!description.trim()) {
+            setResult({
+                status: "error",
+                message: "Please enter a description."
+            });
+            return;
+        }
+
+        if (amount !== "" && Number(amount) < 0) {
+            setResult({
+                status: "error",
+                message: "Amount cannot be negative."
+            });
+            return;
+        }
+
+        if (
+            suspiciousUrl.trim() &&
+            !/^https?:\/\/.+/i.test(suspiciousUrl.trim())
+        ) {
+            setResult({
+                status: "error",
+                message: "Please enter a valid URL starting with http:// or https://."
+            });
+            return;
+        }
+
         setLoading(true);
         setResult(null);
 
         try {
+
+            const token = localStorage.getItem("token")
 
             const response = await fetch(
                 "http://127.0.0.1:5000/api/fraud/report",
@@ -37,11 +74,11 @@ function ReportFraud() {
                     method: "POST",
 
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
                     },
 
                     body: JSON.stringify({
-                        user_id: user.id,
                         fraud_type: fraudType,
                         description: description,
                         amount: amount || 0,
@@ -188,6 +225,7 @@ function ReportFraud() {
                 <input
                     type="number"
                     min="0"
+                    step="0.01"
                     value={amount}
                     onChange={(e) =>
                         setAmount(e.target.value)
@@ -227,7 +265,7 @@ function ReportFraud() {
                     disabled={loading}
                     style={{
                         padding: "12px 25px",
-                        cursor: "pointer"
+                        cursor: loading ? "not-allowed" : "pointer"
                     }}
                 >
 

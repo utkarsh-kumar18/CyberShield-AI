@@ -5,6 +5,7 @@ from config import Config
 from extensions import db, bcrypt, jwt
 
 from models.user import User
+from models.scan import Scan
 from routes.auth import auth
 from routes.scanner import scanner
 from routes.message_scanner import message_scanner
@@ -18,7 +19,9 @@ CORS(
     app,
     resources={
         r"/api/*": {
-            "origins": "http://localhost:5173"
+            "origins": "http://localhost:5173",
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"]
         }
     }
 )

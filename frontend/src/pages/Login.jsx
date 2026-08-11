@@ -46,6 +46,8 @@ function Login() {
                     JSON.stringify(data.user)
                 );
 
+                window.location.href = "/dashboard";
+
                 setMessage("Login successful!");
 
             } else {
