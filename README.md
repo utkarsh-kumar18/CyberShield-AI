@@ -140,3 +140,41 @@ The platform combines a React frontend, Flask REST API, MySQL database, machine-
                                      │ Google Safe      │
                                      │ Browsing         │
                                      └──────────────────┘
+
+
+## 📁 Project Structure
+
+CyberShield AI/
+│
+├── backend/
+│   ├── models/
+│   │   ├── user.py
+│   │   ├── scan.py
+│   │   └── fraud_report.py
+│   │
+│   ├── routes/
+│   │   ├── auth.py
+│   │   ├── scanner.py
+│   │   ├── message_scanner.py
+│   │   ├── fraud_reports.py
+│   │   ├── analytics.py
+│   │   └── admin.py
+│   │
+│   ├── app.py
+│   ├── config.py
+│   ├── extensions.py
+│   ├── .env
+│   └── requirements.txt
+│
+├── frontend/
+│   ├── src/
+│   │   ├── pages/
+│   │   ├── utils/
+│   │   ├── App.jsx
+│   │   └── index.css
+│   │
+│   ├── package.json
+│   └── vite.config.js
+│
+├── .gitignore
+└── README.md                                 
