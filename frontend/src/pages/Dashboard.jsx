@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../utils/api";
 import "./Dashboard.css";
 
 function Dashboard() {
 
     const navigate = useNavigate();
     const [reports, setReports] = useState([]);
+    const [recentScans, setRecentScans] = useState([]);
     const [totalScans, setTotalScans] = useState(0);
     const [threatsDetected, setThreatsDetected] = useState(0);
 
@@ -15,17 +17,13 @@ function Dashboard() {
 
     useEffect(() => {
 
-        const token = localStorage.getItem("token");
-
-        fetch("http://127.0.0.1:5000/api/fraud/my-reports", {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
-            .then((response) => response.json())
+        apiFetch("/api/fraud/my-reports")
+            .then((response) => {
+                if (!response) return null;
+                return response.json();
+            })
             .then((data) => {
                 if (data.status === "success") {
-                    console.log("Reports:", data.reports);
                     setReports(data.reports);
                 }
             })
@@ -33,17 +31,20 @@ function Dashboard() {
                 console.error("Failed to load reports:", error);
             });
 
-        fetch("http://127.0.0.1:5000/api/scan/my-scans", {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
-            .then((response) => response.json())
+        apiFetch("/api/scan/my-scans")
+            .then((response) => {
+                if (!response) return null;
+                return response.json();
+            })
             .then((data) => {
+                if (!data) return;
+
                 if (data.status === "success") {
 
                     // Total scans
                     setTotalScans(data.count);
+
+                    setRecentScans(data.scans.slice(0, 3));
 
                     // Count detected threats
                     const threats = data.scans.filter((scan) => {
@@ -66,9 +67,6 @@ function Dashboard() {
     }, []);
 
     const reportsCount = reports.length;
-    const threatsCount = reports.filter(
-        (report) => report.status !== "resolved"
-    ).length;
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -105,6 +103,10 @@ function Dashboard() {
                         🚨 Report Fraud
                     </button>
 
+                     <button onClick={() => navigate("/my-report")}>
+                        📋 My Reports
+                    </button>
+
                     <button onClick={() => navigate("/threat-analytics")}>
                         📊 Threat Analytics
                     </button>
@@ -116,6 +118,12 @@ function Dashboard() {
                     <button onClick={() =>  navigate("/my-scans")}>
                         🔍 Scan History
                     </button>
+
+                    {user?.role === "admin" && (
+                        <button onClick={() => navigate("/admin")}>
+                            👨‍💼 Admin Panel
+                        </button>
+                    )}
 
                 </nav>
 
@@ -256,14 +264,9 @@ function Dashboard() {
                                 🔗
                             </div>
 
-                            <h3>
-                                Website Scanner
-                            </h3>
+                            <h3>Website Scanner</h3>
 
-                            <p>
-                                Check suspicious URLs and websites
-                                for possible threats.
-                            </p>
+                            <p> Check suspicious URLs and websites for possible threats.</p>
 
                             <button>
                                 Scan Website →
@@ -333,36 +336,57 @@ function Dashboard() {
 
                     <div className="section-title">
 
-                        <h2>
-                            Recent Activity
-                        </h2>
+                        <h2>Recent Activity</h2>
 
-                        <p>
-                            Your latest security activity
-                        </p>
+                        <p>Your latest security activity</p>
 
                     </div>
 
                     <div className="empty-activity">
 
-                        <div>
-                            🔍
-                        </div>
+                        {recentScans.length === 0 ? (
+                            <>
+                                <span>🔍</span>
+                                <h3>No activity yet</h3>
+                                <p>Your scans and reports will appear here.</p>
+                            </>
+                        ) : (
+                            <div className="activity-list">
+                                {recentScans.map((scan) => (
+                                    <div className="activity-item" key={scan.id}>
 
-                        <h3>
-                            No activity yet
-                        </h3>
+                                        <span className="activity-icon">
+                                            {scan.scan_type === "message" ? "💬" : "🔗"}
+                                        </span>
 
-                        <p>
-                            Your scans and reports will appear here.
-                        </p>
+                                        <div className="activity-details">
+                                            <h3>
+                                                {scan.scan_type === "message"
+                                                    ? "Scam Message Scan"
+                                                    : "Website Scan"}
+                                            </h3>
 
+                                            <p>{scan.target}</p>
+
+                                            <small>
+                                                {new Date(scan.created_at).toLocaleString("en-IN")}
+                                            </small>
+                                        </div>
+
+                                        <div className="activity-result">
+                                            {scan.result === "safe" && "🟢 Safe"}
+                                            {scan.result === "scam" && "🔴 Scam"}
+                                            {scan.result === "malicious" && "🔴 Malicious"}
+                                            {scan.result === "suspicious" && "🟡 Suspicious"}
+                                            {scan.result === "pending" && "🟠 Pending"}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
-
                 </section>
-
             </main>
-
         </div>
     );
 }

@@ -57,9 +57,11 @@ function WebsiteScanner() {
 
     return (
         <div style={{
-            padding: "40px",
+            width: "100%",
+            padding: "30px 20px",
             maxWidth: "900px",
-            margin: "auto"
+            margin: "0 auto",
+            boxSizing: "border-box"
         }}>
 
             <h1>🔗 Website Scanner</h1>
@@ -81,6 +83,7 @@ function WebsiteScanner() {
                         width: "70%",
                         padding: "14px",
                         fontSize: "16px",
+                        boxSizing: "border-box",
                         marginRight: "10px"
                     }}
                 />

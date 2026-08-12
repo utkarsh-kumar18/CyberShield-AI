@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 function AdminPanel() {
 
     const [reports, setReports] = useState([]);
+    const [scans, setScans] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [selectedReport, setSelectedReport] = useState(null);
@@ -96,6 +97,24 @@ function AdminPanel() {
         loadReports();
     }, []);
 
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+
+        fetch("http://127.0.0.1:5000/api/admin/scans", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.status === "success") {
+                    setScans(data.scans);
+                }
+            })
+            .catch((error) => {
+                console.error("Failed to load scans:", error);
+            });
+    }, []);
 
     const updateStatus = async (
         reportId,
@@ -110,8 +129,8 @@ function AdminPanel() {
                     method: "PUT",
 
                     headers: {
-                        "Content-Type":
-                            "application/json"
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${localStorage.getItem("token")}`
                     },
 
                     body: JSON.stringify({
@@ -138,7 +157,7 @@ function AdminPanel() {
 
             } else {
 
-                alert(data.message);
+                alert(data.message || "Unable to update report.");
 
             }
 
@@ -180,13 +199,241 @@ function AdminPanel() {
         );
     }
 
+        return (
+            <>
+                <style>{`
+                    .admin-page {
+                        width: 100%;
+                        max-width: 1200px;
+                        margin: 30px auto;
+                        padding: 20px;
+                        box-sizing: border-box;
+                        min-width: 0;
+                    }
 
-    return (
+                    .admin-stats {
+                        display: grid;
+                        grid-template-columns: repeat(5, minmax(0, 1fr));
+                        gap: 15px;
+                        margin-top: 25px;
+                    }
+
+                    .admin-filters {
+                        display: flex;
+                        gap: 10px;
+                        flex-wrap: wrap;
+                        margin-top: 20px;
+                        padding: 15px;
+                        align-items: center;
+                        width: 100%;
+                        box-sizing: border-box;
+                        background: #fff;
+                        border-radius: 12px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+                    }
+
+                    .admin-search {
+                        flex: 1;
+                        min-width: 200px;
+                        padding: 10px;
+                        box-sizing: border-box;
+                    }
+
+                    .admin-table-wrapper {
+                        margin-top: 30px;
+                        background: #fff;
+                        border-radius: 12px;
+                        padding: 20px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                        overflow-x: auto;
+                        width: 100%;
+                        box-sizing: border-box;
+                    }
+
+                    .admin-table {
+                        width: 100%;
+                        min-width: 850px;
+                        border-collapse: collapse;
+                        table-layout: fixed;
+                    }
+
+                    @media (max-width: 700px) {
+                        .admin-page {
+                            margin: 15px auto;
+                            padding: 12px;
+                        }
+
+                        .admin-page h1 {
+                            font-size: 26px;
+                            text-align: center;
+                        }
+
+                        .admin-page > p {
+                            text-align: center;
+                            font-size: 14px;
+                        }
+
+                        .admin-stats {
+                            grid-template-columns: repeat(2, minmax(0, 1fr));
+                            gap: 10px;
+                        }
+
+                        .admin-stats .analytics-card {
+                            min-width: 0;
+                            padding: 14px 8px;
+                            text-align: center;
+                            box-sizing: border-box;
+                        }
+
+                        .admin-stats .analytics-card:last-child {
+                            grid-column: 1 / -1;
+                        }
+
+                        .admin-stats .analytics-card h2 {
+                            font-size: 20px;
+                            margin: 5px 0;
+                            white-space: nowrap;
+                        }
+
+                        .admin-stats .analytics-card p {
+                            font-size: 13px;
+                            margin: 5px 0;
+                        }
+
+                        .admin-filters {
+                            display: grid;
+                            grid-template-columns: 1fr 1fr;
+                            gap: 8px;
+                            padding: 12px;
+                        }
+
+                        .admin-search {
+                            grid-column: 1 / -1;
+                            min-width: 0;
+                            width: 100%;
+                        }
+
+                        .admin-filters select,
+                        .admin-filters button {
+                            width: 100%;
+                            min-width: 0;
+                            box-sizing: border-box;
+                        }
+
+                        .admin-table-wrapper {
+                            padding: 10px;
+                        }
+
+                        .admin-table {
+                            min-width: 850px;
+                        }
+                    }
+
+                    @media (max-width: 400px) {
+                        .admin-stats {
+                            grid-template-columns: 1fr 1fr;
+                        }
+
+                        .admin-filters {
+                            grid-template-columns: 1fr;
+                        }
+
+                        .admin-search {
+                            grid-column: auto;
+                        }
+                    }
+
+                    @media (max-width: 700px) {
+
+                        .admin-page {
+                            width: 100%;
+                            max-width: 100%;
+                            margin: 10px auto;
+                            padding: 12px;
+                            box-sizing: border-box;
+                        }
+
+                        .admin-page h1 {
+                            font-size: 26px;
+                            text-align: center;
+                        }
+
+                        .admin-page > p {
+                            text-align: center;
+                            font-size: 14px;
+                        }
+
+                        .admin-stats {
+                            grid-template-columns: repeat(2, minmax(0, 1fr));
+                            gap: 10px;
+                        }
+
+                        .admin-stats .analytics-card {
+                            min-width: 0;
+                            padding: 14px 8px;
+                            text-align: center;
+                            box-sizing: border-box;
+                        }
+
+                        .admin-stats .analytics-card:last-child {
+                            grid-column: 1 / -1;
+                        }
+
+                        .admin-stats .analytics-card h2 {
+                            font-size: 20px;
+                            margin: 5px 0;
+                            white-space: nowrap;
+                        }
+
+                        .admin-stats .analytics-card p {
+                            font-size: 13px;
+                            margin: 5px 0;
+                        }
+
+                        .admin-filters {
+                            display: grid;
+                            grid-template-columns: 1fr 1fr;
+                            gap: 8px;
+                            padding: 12px;
+                        }
+
+                        .admin-search {
+                            grid-column: 1 / -1;
+                            width: 100%;
+                            min-width: 0;
+                        }
+
+                        .admin-filters select,
+                        .admin-filters button {
+                            width: 100%;
+                            min-width: 0;
+                            box-sizing: border-box;
+                        }
+
+                        .admin-table-wrapper {
+                            width: 100%;
+                            overflow-x: auto;
+                            padding: 10px;
+                            box-sizing: border-box;
+                        }
+
+                        .admin-table {
+                            width: 850px;
+                            min-width: 850px;
+                            table-layout: fixed;
+                        }
+                    }
+                `}</style>
+
+                <div className="admin-page"></div>
 
         <div style={{
+            width: "100%",
             maxWidth: "1200px",
             margin: "30px auto",
-            padding: "20px"
+            padding: "20px",
+            boxSizing: "border-box",
+            minWidth: 0
         }}>
 
             <h1>
@@ -197,14 +444,8 @@ function AdminPanel() {
                 Manage and review citizen fraud reports.
             </p>
 
-            <div
-                style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(5, 1fr)",
-                    gap: "15px",
-                    marginTop: "25px"
-                }}
-            >
+            <div className="admin-stats" >
+
                 <div className="analytics-card">
                     <h2>{totalReports}</h2>
                     <p>Total Reports</p>
@@ -318,70 +559,66 @@ function AdminPanel() {
 
             </div>
 
-            <div style={{
-                marginTop: "30px",
-                background: "#ffffff",
-                borderRadius: "12px",
-                padding: "20px",
-                boxShadow:
-                    "0 2px 10px rgba(0,0,0,0.1)",
-                overflowX: "auto"
-            }}>
+            <div className="admin-table-wrapper">
 
-                <table style={{
-                    width: "100%",
-                    borderCollapse: "collapse"
-                }}>
+                <table className="admin-table">
 
                     <thead>
 
                         <tr>
 
                             <th style={{
-                                padding: "12px",
-                                textAlign: "left"
+                                padding: "10px 6px",
+                                textAlign: "left",
+                                width: "7%"
                             }}>
                                 ID
                             </th>
 
                             <th style={{
-                                padding: "12px",
-                                textAlign: "left"
+                                padding: "10px 6px",
+                                textAlign: "left",
+                                width: "15%"
                             }}>
                                 Type
                             </th>
 
                             <th style={{
-                                padding: "12px",
-                                textAlign: "left"
+                                padding: "10px 6px",
+                                textAlign: "left",
+                                width: "23%"
                             }}>
                                 Description
                             </th>
 
                             <th style={{
-                                padding: "12px",
-                                textAlign: "left"
+                                padding: "10px 6px",
+                                textAlign: "left",
+                                width: "10%"
                             }}>
                                 Amount
                             </th>
 
                             <th style={{
-                                padding: "12px",
-                                textAlign: "left"
+                                padding: "10px 6px",
+                                textAlign: "left",
+                                width: "12%"
                             }}>
                                 URL
                             </th>
 
                             <th style={{
-                                padding: "12px",
-                                textAlign: "left"
+                                padding: "10px 6px",
+                                textAlign: "left",
+                                width: "13%"
                             }}>
                                 Status
                             </th>
 
                             <th style={{
-                                padding: "12px",
-                                textAlign: "left"
+                                padding: "10px 6px",
+                                textAlign: "left",
+                                width: "20%"
                             }}>
                                 Action
                             </th>
@@ -404,36 +641,46 @@ function AdminPanel() {
                                 >
 
                                     <td style={{
-                                        padding: "12px"
+                                        padding: "10px 6px",
+                                        overflowWrap: "anywhere",
+                                        wordBreak: "break-word"
                                     }}>
                                         #{report.id}
                                     </td>
 
 
                                     <td style={{
-                                        padding: "12px"
+                                        padding: "10px 6px",
+                                        overflowWrap: "anywhere",
+                                        wordBreak: "break-word"
                                     }}>
                                         {report.fraud_type}
                                     </td>
 
 
                                     <td style={{
-                                        padding: "12px",
-                                        maxWidth: "300px"
+                                        padding: "10px 6px",
+                                        maxWidth: "300px",
+                                        overflowWrap: "anywhere",
+                                        wordBreak: "break-word"
                                     }}>
                                         {report.description}
                                     </td>
 
 
                                     <td style={{
-                                        padding: "12px"
+                                        padding: "10px 6px",
+                                        overflowWrap: "anywhere",
+                                        wordBreak: "break-word"
                                     }}>
                                         ₹{report.amount.toLocaleString()}
                                     </td>
 
 
                                     <td style={{
-                                        padding: "12px"
+                                        padding: "10px 6px",
+                                        overflowWrap: "anywhere",
+                                        wordBreak: "break-word"
                                     }}>
                                         {report.suspicious_url
                                             || "-"
@@ -480,6 +727,7 @@ function AdminPanel() {
                                         </select>
 
                                         <button
+                                            type="button"
                                             onClick={() => setSelectedReport(report)}
                                             style={{
                                                 marginLeft: "8px",
@@ -500,6 +748,85 @@ function AdminPanel() {
                     </tbody>
 
                 </table>
+
+                <section style={{ marginTop: "40px" }}>
+                    <h2>🔍 All Security Scans</h2>
+
+                    <p>
+                        View all website and scam message scans performed by citizens.
+                    </p>
+
+                    <div style={{ overflowX: "auto", marginTop: "20px" }}>
+
+                        <table
+                            style={{
+                                width: "100%",
+                                borderCollapse: "collapse"
+                            }}
+                        >
+                            <thead>
+                                <tr>
+                                    <th style={thStyle}>ID</th>
+                                    <th style={thStyle}>User</th>
+                                    <th style={thStyle}>Type</th>
+                                    <th style={thStyle}>Target</th>
+                                    <th style={thStyle}>Result</th>
+                                    <th style={thStyle}>Date</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {scans.map((scan) => (
+                                    <tr key={scan.id}>
+
+                                        <td style={tdStyle}>
+                                            #{scan.id}
+                                        </td>
+
+                                        <td style={tdStyle}>
+                                            <strong>{scan.user_name}</strong> <br />
+                                            <small>{scan.user_email}</small>
+                                        </td>
+
+                                        <td style={tdStyle}>
+                                            {scan.scan_type === "message"
+                                                ? "💬 Message"
+                                                : "🔗 Website"}
+                                        </td>
+
+                                        <td
+                                            style={{
+                                                ...tdStyle,
+                                                maxWidth: "300px",
+                                                wordBreak: "break-word"
+                                            }}
+                                        >
+                                            {scan.target}
+                                        </td>
+
+                                        <td style={tdStyle}>
+                                            {scan.result === "safe" && "🟢 Safe"}
+                                            {scan.result === "scam" && "🔴 Scam"}
+                                            {scan.result === "malicious" && "🔴 Malicious"}
+                                            {scan.result === "suspicious" && "🟡 Suspicious"}
+                                            {scan.result === "pending" && "🟠 Pending"}
+                                        </td>
+
+                                        <td style={tdStyle}>
+                                            {scan.created_at
+                                                ? new Date(
+                                                    scan.created_at
+                                                ).toLocaleString("en-IN")
+                                                : "-"}
+                                        </td>
+
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+
+                    </div>
+                </section>
 
                 {selectedReport && (
                     <div
@@ -579,7 +906,19 @@ function AdminPanel() {
             </div>
 
         </div>
+        </>
     );
 }
+
+const thStyle = {
+    padding: "12px",
+    borderBottom: "2px solid #ddd",
+    textAlign: "left"
+};
+
+const tdStyle = {
+    padding: "12px",
+    borderBottom: "1px solid #ddd"
+};
 
 export default AdminPanel;

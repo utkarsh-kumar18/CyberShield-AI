@@ -1,19 +1,18 @@
 import { useState } from "react";
+import "./Login.css";
 
 function Login() {
-
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState("");
 
     const handleLogin = async (e) => {
-
         e.preventDefault();
 
         setMessage("Logging in...");
 
         try {
-
             const response = await fetch(
                 "http://127.0.0.1:5000/api/auth/login",
                 {
@@ -33,9 +32,6 @@ function Login() {
             const data = await response.json();
 
             if (response.ok) {
-
-                console.log("Login successful:", data);
-
                 localStorage.setItem(
                     "token",
                     data.token
@@ -47,18 +43,13 @@ function Login() {
                 );
 
                 window.location.href = "/dashboard";
-
-                setMessage("Login successful!");
-
             } else {
-
                 setMessage(
                     data.message || "Login failed"
                 );
             }
 
         } catch (error) {
-
             console.error(error);
 
             setMessage(
@@ -68,49 +59,126 @@ function Login() {
     };
 
     return (
-        <div>
+        <div className="login-page">
 
-            <h1>CyberShield AI</h1>
+            <div className="login-card">
 
-            <h2>Login</h2>
-
-            <form onSubmit={handleLogin}>
-
-                <div>
-                    <label>Email</label>
-
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) =>
-                            setEmail(e.target.value)
-                        }
-                        placeholder="Enter your email"
-                        required
-                    />
+                {/* Logo */}
+                <div className="login-logo">
+                    <span className="shield-icon">🛡️</span>
+                    <span>
+                        CyberShield <b>AI</b>
+                    </span>
                 </div>
 
-                <div>
-                    <label>Password</label>
+                <h1>Welcome Back</h1>
 
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) =>
-                            setPassword(e.target.value)
-                        }
-                        placeholder="Enter your password"
-                        required
-                    />
+                <p className="login-subtitle">
+                    Sign in to your security dashboard
+                </p>
+
+                <form onSubmit={handleLogin}>
+
+                    {/* Email */}
+                    <div className="input-group">
+
+                        <label htmlFor="email">
+                            Email Address
+                        </label>
+
+                        <div className="input-wrapper">
+                            <span className="input-icon">✉️</span>
+
+                            <input
+                                id="email"
+                                type="email"
+                                value={email}
+                                onChange={(e) =>
+                                    setEmail(e.target.value)
+                                }
+                                placeholder="Enter your email address"
+                                required
+                            />
+                        </div>
+
+                    </div>
+
+                    {/* Password */}
+                    <div className="input-group">
+
+                        <label htmlFor="password">
+                            Password
+                        </label>
+
+                        <div className="input-wrapper">
+                            <span className="input-icon">🔒</span>
+
+                            <input
+                                id="password"
+                                type={
+                                    showPassword
+                                        ? "text"
+                                        : "password"
+                                }
+                                value={password}
+                                onChange={(e) =>
+                                    setPassword(e.target.value)
+                                }
+                                placeholder="Enter your password"
+                                required
+                            />
+
+                            <button
+                                type="button"
+                                className="password-toggle"
+                                onClick={() =>
+                                    setShowPassword(!showPassword)
+                                }
+                            >
+                                {showPassword ? "🙈" : "👁️"}
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div className="forgot-password">
+                        <a href="/forgot-password">
+                                Forfot Password ?
+                        </a>
+                    </div>
+
+                    {/* Login button */}
+                    <button
+                        type="submit"
+                        className="login-button"
+                    >
+                        Login →
+                    </button>
+
+                </form>
+
+                {/* Message */}
+                {message && (
+                    <p className="login-message">
+                        {message}
+                    </p>
+                )}
+
+                {/* Register */}
+                <div className="register-section">
+                    <span>Don't have an account?</span>
+
+                    <a href="/register">
+                        Create Account
+                    </a>
                 </div>
 
-                <button type="submit">
-                    Login
-                </button>
+                <div className="security-note">
+                    🛡️ Your security is our priority
+                </div>
 
-            </form>
-
-            <p>{message}</p>
+            </div>
 
         </div>
     );

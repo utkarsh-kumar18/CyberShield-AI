@@ -22,6 +22,7 @@ VIRUSTOTAL_URL = "https://www.virustotal.com/api/v3"
 def scan_url():
 
     data = request.get_json()
+    scan_id = data.get("scan_id");
 
     if not data:
         return jsonify({
@@ -178,31 +179,59 @@ def scan_url():
                 "message": "VirusTotal did not return an analysis ID."
             }), 502
 
-        # Wait briefly for analysis
-        time.sleep(3)
+        # Poll VirusTotal until the analysis is completed
+        analysis_data = None
+        attributes = None
 
-        analysis_response = requests.get(
-            f"{VIRUSTOTAL_URL}/analyses/{analysis_id}",
-            headers=headers,
-            timeout=20
-        )
+        for attempt in range(10):
 
-        if analysis_response.status_code != 200:
+            analysis_response = requests.get(
+                f"{VIRUSTOTAL_URL}/analyses/{analysis_id}",
+                headers=headers,
+                timeout=20
+            )
 
+            if analysis_response.status_code != 200:
+                return jsonify({
+                    "status": "error",
+                    "url": url,
+                    "message": "Unable to retrieve VirusTotal analysis.",
+                    "details": analysis_response.text[:300]
+                }), analysis_response.status_code
+
+            analysis_data = analysis_response.json()
+
+            attributes = (
+                analysis_data
+                .get("data", {})
+                .get("attributes", {})
+            )
+
+            analysis_status = attributes.get("status")
+
+            print(
+                f"VirusTotal analysis attempt {attempt + 1}: "
+                f"{analysis_status}"
+            )
+
+            # Analysis is complete
+            if analysis_status == "completed":
+                break
+
+            # Still processing
+            time.sleep(3)
+
+
+        # If VirusTotal is still processing after all attempts
+        if not attributes or attributes.get("status") != "completed":
             return jsonify({
                 "status": "pending",
                 "url": url,
-                "message": "VirusTotal scan is still processing."
+                "message": "VirusTotal analysis is still processing."
             }), 202
 
-        analysis_data = analysis_response.json()
 
-        attributes = (
-            analysis_data
-            .get("data", {})
-            .get("attributes", {})
-        )
-
+        # Get final VirusTotal statistics
         status = attributes.get("status")
 
         stats = attributes.get(
@@ -231,7 +260,6 @@ def scan_url():
         )
 
         # Combine VirusTotal + Google Safe Browsing results
-
         google_is_unsafe = (
             google_status == "unsafe"
         )
@@ -301,16 +329,33 @@ def scan_url():
                 "VirusTotal analysis is still processing."
             )
 
+
         user_id = get_jwt_identity()
 
-        scan = Scan(
-            user_id=user_id,
-            scan_type="url",
-            target=url,
-            result=threat_status
-        )
+        # If this is a re-scan, update the existing pending scan
+        scan = None
 
-        db.session.add(scan)
+        if scan_id:
+            scan = Scan.query.filter_by(
+                id=scan_id,
+                user_id=user_id
+            ).first()
+
+            if scan:
+                scan.result = threat_status
+                scan.target = url
+
+        # Otherwise create a new scan
+        if scan is None:
+            scan = Scan(
+                user_id=user_id,
+                scan_type="url",
+                target=url,
+                result=threat_status
+            )
+
+            db.session.add(scan)
+
         db.session.commit()    
 
         return jsonify({

@@ -1,0 +1,304 @@
+.register-page {
+    height: 100vh;
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+
+    box-sizing: border-box;
+
+    overflow: hidden;
+
+    background: linear-gradient(
+        135deg,
+        #0f172a,
+        #173f67,
+        #1d6b9c
+    );
+}
+
+.register-card {
+    width: 100%;
+    max-width: 470px;
+
+    background: white;
+
+    border-radius: 18px;
+
+    padding: 25px 40px;
+
+    box-sizing: border-box;
+
+    box-shadow:
+        0 20px 55px rgba(0, 0, 0, 0.25);
+
+    text-align: center;
+}
+
+
+/* Brand */
+
+.register-brand {
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 4px;
+}
+
+.register-shield {
+    font-size: 58px;
+}
+
+.register-brand h1 {
+    margin: 0;
+
+    font-size: 27px;
+
+    color: #111827;
+}
+
+.register-brand h1 span {
+    color: #1595dc;
+}
+
+
+/* Heading */
+
+.register-card h2 {
+    margin: 8px 0 7px;
+
+    font-size: 27px;
+
+    color: #111827;
+}
+
+.register-subtitle {
+    margin: 0 auto 18px;
+
+    max-width: 350px;
+
+    color: #667085;
+
+    font-size: 15px;
+
+    line-height: 1.5;
+}
+
+
+/* Inputs */
+
+.register-input-group {
+    text-align: left;
+
+    margin-bottom: 13px;
+}
+
+.register-input-group label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #344054;
+
+    font-size: 14px;
+
+    font-weight: 600;
+}
+
+.register-input-wrapper {
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+}
+
+.register-input-icon {
+    position: absolute;
+
+    left: 14px;
+
+    font-size: 17px;
+
+    z-index: 1;
+}
+
+.register-input-wrapper input {
+    width: 100%;
+
+    height: 48px;
+
+    box-sizing: border-box;
+
+    padding: 0 44px;
+
+    border: 1px solid #d0d5dd;
+
+    border-radius: 9px;
+
+    font-size: 15px;
+
+    outline: none;
+
+    color: #101828;
+}
+
+.register-input-wrapper input::placeholder {
+    color: #98a2b3;
+}
+
+.register-input-wrapper input:focus {
+    border-color: #1976d2;
+
+    box-shadow:
+        0 0 0 3px rgba(25, 118, 210, 0.12);
+}
+
+
+/* Password eye */
+
+.register-password-toggle {
+    position: absolute;
+
+    right: 10px;
+
+    border: none;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    font-size: 18px;
+
+    padding: 6px;
+}
+
+
+/* Button */
+
+.register-submit-button {
+    width: 100%;
+
+    height: 50px;
+
+    margin-top: 5px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: #145f94;
+
+    color: white;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.register-submit-button:hover {
+    background: #0e426c;
+
+    transform: translateY(-1px);
+}
+
+
+/* Messages */
+
+.register-success {
+    margin: 16px 0 0;
+
+    color: #16803c;
+
+    font-size: 14px;
+}
+
+.register-error {
+    margin: 16px 0 0;
+
+    color: #d92d20;
+
+    font-size: 14px;
+}
+
+
+/* Login section */
+
+.register-login-section {
+    display: flex;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    margin-top: 15px;
+
+    padding-top: 15px;
+
+    border-top: 1px solid #eaecf0;
+
+    font-size: 14px;
+
+    color: #667085;
+}
+
+.register-login-section a {
+    color: #1677c8;
+
+    font-weight: 600;
+
+    text-decoration: none;
+}
+
+.register-login-section a:hover {
+    text-decoration: underline;
+}
+
+
+/* Security */
+
+.register-security {
+    margin-top: 24px;
+
+    color: #667085;
+
+    font-size: 12px;
+}
+
+
+/* Mobile */
+
+@media (max-width: 500px) {
+
+    .register-page {
+        padding: 20px;
+    }
+
+    .register-card {
+        padding: 30px 22px;
+    }
+
+    .register-brand h1 {
+        font-size: 23px;
+    }
+
+    .register-shield {
+        font-size: 48px;
+    }
+
+    .register-card h2 {
+        font-size: 24px;
+    }
+}

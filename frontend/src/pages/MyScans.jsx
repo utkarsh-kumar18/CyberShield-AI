@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 function MyScans() {
     const [scans, setScans] = useState([]);
@@ -55,10 +55,10 @@ function MyScans() {
 
     const filteredScans = scans.filter((scan) => {
         const result = String(scan.result).toLowerCase();
-        const type = String(scan.scan_type).toLocaleLowerCase();
+        const type = String(scan.scan_type).toLowerCase();
 
         if (filter === "websites") {
-            return type === "Website" || type === "url";
+            return type === "website" || type === "url";
         }
 
         if (filter === "messages") {
@@ -79,6 +79,54 @@ function MyScans() {
 
         return true;
     });
+
+    const handleRescan = async (scan) => {
+        try {
+            const token = localStorage.getItem("token");
+
+            const response = await fetch(
+                "http://127.0.0.1:5000/api/scan/url",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        url: scan.target,
+                        scan_id: scan.id
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                alert(data.message || "Re-scan failed.");
+                return;
+            }
+
+            // Update the displayed result
+            setScans((currentScans) =>
+                currentScans.map((item) =>
+                    item.id === scan.id
+                        ? {
+                            ...item,
+                            result: data.status
+                        }
+                        : item
+                )
+            );
+
+            alert(
+                `Re-scan completed: ${data.status.toUpperCase()}`
+            );
+
+        } catch (error) {
+            console.error("Re-scan error:", error);
+            alert("Unable to connect to CyberShield server.");
+        }
+    };
 
     return (
         <div style={{ padding: "40px" }}>
@@ -143,6 +191,7 @@ function MyScans() {
                                 <th style={thStyle}>Target</th>
                                 <th style={thStyle}>Result</th>
                                 <th style={thStyle}>Date</th>
+                                <th style={thStyle}>Action</th>
                             </tr>
                         </thead>
 
@@ -178,6 +227,17 @@ function MyScans() {
                                         {new Date(
                                             scan.created_at
                                         ).toLocaleString("en-IN")}
+                                    </td>
+
+                                    <td style={tdStyle}>
+                                        {scan.scan_type === "url" &&
+                                            String(scan.result).toLowerCase() === "pending" && (
+                                                <button
+                                                    onClick={() => handleRescan(scan)}
+                                                >
+                                                    🔄 Re-scan
+                                                </button>
+                                            )}
                                     </td>
 
                                 </tr>

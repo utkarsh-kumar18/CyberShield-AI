@@ -63,24 +63,11 @@ function ThreatAnalytics() {
 
 
     return (
-        <div style={{
-            maxWidth: "1100px",
-            margin: "30px auto",
-            padding: "20px"
-        }}>
+        <div className="analytics-container">
             <h1>📊 Threat Analytics</h1>
-            <p>
-                Security intelligence based on citizen
-                fraud reports.
-            </p>
+            <p>Security intelligence based on citizen fraud reports.</p>
             
-            <div style={{
-                display: "grid",
-                gridTemplateColumns:
-                    "repeat(4, 1fr)",
-                gap: "30px",
-                marginTop: "30px"
-            }}>
+            <div className="analytics-stats-grid">
 
                 <div className="analytics-card">
 
@@ -146,16 +133,7 @@ function ThreatAnalytics() {
 
             </div>
             
-            <div
-                className="analytics-chart"
-                style={{
-                    marginTop: "30px",
-                    padding: "30px",
-                    background: "#fff",
-                    borderRadius: "12px",
-                    boxShadow: "0 4px 15px rgba(0,0,0,0.08)"
-                }}
-            >
+            <div className="analytics-chart">
                 <h2
                     style={{
                         textAlign: "center",
@@ -239,14 +217,9 @@ function ThreatAnalytics() {
 
                 ) : (
 
-                    <div style={{
-                        overflowX: "auto"
-                    }}>
+                    <div className="analytics-table-wrapper">
 
-                        <table style={{
-                            width: "100%",
-                            borderCollapse: "collapse"
-                        }}>
+                        <table className="analytics-table">
 
                             <thead>
 

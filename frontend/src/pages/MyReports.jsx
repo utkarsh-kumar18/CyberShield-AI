@@ -1,212 +1,247 @@
 import { useEffect, useState } from "react";
+import "./MyReports.css";
 
 function MyReports() {
-
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
     useEffect(() => {
-
         const token = localStorage.getItem("token");
 
         if (!token) {
-            setError("Please login to view your reports.");
-            setLoading(false);
+            window.location.href = "/login";
             return;
         }
 
-        fetch("http://127.0.0.1:5000/api/fraud/my-reports", {
-            headers: {
-                Authorization: `Bearer ${token}`
+        fetch(
+            "http://127.0.0.1:5000/api/fraud/my-reports",
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
             }
-        })
-        .then((response) => response.json())
-        .then((data) => {
+        )
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.status === "success") {
+                    setReports(data.reports);
+                } else {
+                    setError(
+                        data.message || "Unable to load reports."
+                    );
+                }
 
-            if (data.status === "success") {
-                setReports(data.reports);
-            } else {
-                setError(
-                    data.message || "Unable to load reports."
-                );
-            }
+                setLoading(false);
+            })
+            .catch((error) => {
+                console.error("My reports error:", error);
 
-            setLoading(false);
-        })
-        .catch((error) => {
-
-            console.error("My reports error:", error);
-
-            setError("Unable to connect to server.");
-            setLoading(false);
-        });
-
+                setError("Unable to connect to server.");
+                setLoading(false);
+            });
     }, []);
+
+    const getStatusClass = (status) => {
+        if (status === "resolved") return "status-resolved";
+        if (status === "investigating") return "status-investigating";
+        return "status-pending";
+    };
 
     if (loading) {
         return (
-            <div style={{ textAlign: "center", marginTop: "40px" }}>
-                <h2>My Fraud Reports</h2>
-                <p>Loading reports...</p>
+            <div className="reports-page">
+                <div className="reports-loading">
+                    <div className="loading-icon">📋</div>
+                    <h2>Loading Your Reports</h2>
+                    <p>Please wait...</p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div
-            style={{
-                maxWidth: "1000px",
-                margin: "40px auto",
-                padding: "20px"
-            }}
-        >
+        <div className="reports-page">
 
-            <h1 style={{ textAlign: "center" }}>
-                🛡️ My Fraud Reports
-            </h1>
+            <div className="reports-container">
 
-            <p
-                style={{
-                    textAlign: "center",
-                    color: "#666"
-                }}
-            >
-                View the fraud reports you have submitted.
-            </p>
+                {/* Header */}
 
-            {error && (
-                <p
-                    style={{
-                        textAlign: "center",
-                        color: "red"
-                    }}
-                >
-                    {error}
-                </p>
-            )}
+                <div className="reports-header">
 
-            {!error && reports.length === 0 && (
-                <div
-                    style={{
-                        textAlign: "center",
-                        marginTop: "40px"
-                    }}
-                >
-                    <h3>No fraud reports found.</h3>
+                    <div className="reports-icon">
+                        🛡️
+                    </div>
+
+                    <h1>My Fraud Reports</h1>
+
                     <p>
-                        You have not submitted any fraud reports yet.
+                        Track and manage the fraud reports
+                        you have submitted.
                     </p>
-                </div>
-            )}
-
-            {reports.length > 0 && (
-                <div
-                    style={{
-                        background: "white",
-                        borderRadius: "12px",
-                        boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
-                        overflow: "hidden",
-                        marginTop: "30px"
-                    }}
-                >
-
-                    <table
-                        style={{
-                            width: "100%",
-                            borderCollapse: "collapse"
-                        }}
-                    >
-
-                        <thead>
-                            <tr
-                                style={{
-                                    background: "#f5f5f5"
-                                }}
-                            >
-                                <th style={thStyle}>ID</th>
-                                <th style={thStyle}>Type</th>
-                                <th style={thStyle}>Description</th>
-                                <th style={thStyle}>Amount</th>
-                                <th style={thStyle}>Status</th>
-                                <th style={thStyle}>Date</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-
-                            {reports.map((report) => (
-
-                                <tr key={report.id}>
-
-                                    <td style={tdStyle}>
-                                        #{report.id}
-                                    </td>
-
-                                    <td style={tdStyle}>
-                                        {report.fraud_type}
-                                    </td>
-
-                                    <td style={tdStyle}>
-                                        {report.description}
-                                    </td>
-
-                                    <td style={tdStyle}>
-                                        ₹{Number(
-                                            report.amount || 0
-                                        ).toLocaleString("en-IN")}
-                                    </td>
-
-                                    <td style={tdStyle}>
-                                        <span
-                                            style={{
-                                                fontWeight: "bold",
-                                                color:
-                                                    report.status === "resolved"
-                                                        ? "green"
-                                                        : report.status === "investigating"
-                                                        ? "#d97706"
-                                                        : "#555"
-                                            }}
-                                        >
-                                            {report.status}
-                                        </span>
-                                    </td>
-
-                                    <td style={tdStyle}>
-                                        {report.created_at
-                                            ? new Date(
-                                                report.created_at
-                                            ).toLocaleDateString()
-                                            : "-"}
-                                    </td>
-
-                                </tr>
-
-                            ))}
-
-                        </tbody>
-
-                    </table>
 
                 </div>
-            )}
+
+
+                {/* Error */}
+
+                {error && (
+                    <div className="reports-message error">
+                        ⚠️ {error}
+                    </div>
+                )}
+
+
+                {/* Empty state */}
+
+                {!error && reports.length === 0 && (
+                    <div className="empty-reports">
+
+                        <div className="empty-icon">
+                            📋
+                        </div>
+
+                        <h2>No Fraud Reports Yet</h2>
+
+                        <p>
+                            You haven't submitted any fraud
+                            reports yet.
+                        </p>
+
+                        <a href="/report-fraud">
+                            Report an Incident →
+                        </a>
+
+                    </div>
+                )}
+
+
+                {/* Reports */}
+
+                {reports.length > 0 && (
+                    <div className="reports-card">
+
+                        <div className="reports-card-header">
+
+                            <div>
+                                <h2>
+                                    Submitted Reports
+                                </h2>
+
+                                <p>
+                                    {reports.length} report
+                                    {reports.length !== 1
+                                        ? "s"
+                                        : ""} found
+                                </p>
+                            </div>
+
+                            <div className="report-count">
+                                {reports.length}
+                            </div>
+
+                        </div>
+
+
+                        <div className="table-wrapper">
+
+                            <table>
+
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Fraud Type</th>
+                                        <th>Description</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+
+                                    {reports.map((report) => (
+
+                                        <tr key={report.id}>
+
+                                            <td>
+                                                <strong>
+                                                    #{report.id}
+                                                </strong>
+                                            </td>
+
+                                            <td>
+                                                <span className="fraud-type">
+                                                    {report.fraud_type}
+                                                </span>
+                                            </td>
+
+                                            <td className="description-cell">
+                                                {report.description}
+                                            </td>
+
+                                            <td>
+                                                <strong>
+                                                    ₹
+                                                    {Number(
+                                                        report.amount || 0
+                                                    ).toLocaleString(
+                                                        "en-IN"
+                                                    )}
+                                                </strong>
+                                            </td>
+
+                                            <td>
+                                                <span
+                                                    className={`status-badge ${getStatusClass(
+                                                        report.status
+                                                    )}`}
+                                                >
+                                                    {report.status ===
+                                                    "resolved"
+                                                        ? "✓ Resolved"
+                                                        : report.status ===
+                                                          "investigating"
+                                                        ? "◉ Investigating"
+                                                        : "◷ Pending"}
+                                                </span>
+                                            </td>
+
+                                            <td>
+                                                {report.created_at
+                                                    ? new Date(
+                                                          report.created_at
+                                                      ).toLocaleDateString(
+                                                          "en-IN"
+                                                      )
+                                                    : "-"}
+                                            </td>
+
+                                        </tr>
+
+                                    ))}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+                )}
+
+
+                {/* Security note */}
+
+                <div className="reports-security">
+                    🛡️ Your reports are securely associated with
+                    your account.
+                </div>
+
+            </div>
 
         </div>
     );
 }
-
-const thStyle = {
-    padding: "15px",
-    textAlign: "left",
-    borderBottom: "1px solid #ddd",
-    color: "#555"
-};
-
-const tdStyle = {
-    padding: "15px",
-    borderBottom: "1px solid #eee",
-    color: "#555"
-};
 
 export default MyReports;
