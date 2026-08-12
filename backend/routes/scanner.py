@@ -16,19 +16,19 @@ scanner = Blueprint("scanner", __name__)
 
 VIRUSTOTAL_URL = "https://www.virustotal.com/api/v3"
 
-
 @scanner.route("/url", methods=["POST"])
 @jwt_required()
 def scan_url():
 
-    data = request.get_json()
-    scan_id = data.get("scan_id");
+    data = request.get_json(silent=True)
 
     if not data:
         return jsonify({
             "status": "error",
             "message": "No data received"
         }), 400
+
+    scan_id = data.get("scan_id");
 
     url = data.get("url", "").strip()
 
@@ -159,9 +159,8 @@ def scan_url():
             return jsonify({
                 "status": "error",
                 "url": url,
-                "message": "VirusTotal rejected the scan request.",
-                "details": response.text[:300]
-            }), response.status_code
+                "message": "VirusTotal rejected the scan request."
+            }), 502
 
         scan_data = response.json()
 
@@ -176,7 +175,7 @@ def scan_url():
             return jsonify({
                 "status": "error",
                 "url": url,
-                "message": "VirusTotal did not return an analysis ID."
+                "message": "Unable to retrieve VirusTotal analysis."
             }), 502
 
         # Poll VirusTotal until the analysis is completed
@@ -337,7 +336,6 @@ def scan_url():
 
         if scan_id:
             scan = Scan.query.filter_by(
-                id=scan_id,
                 user_id=user_id
             ).first()
 
@@ -392,6 +390,7 @@ def scan_url():
         }), 502
 
     except Exception as error:
+        db.session.rollback()
 
         print("Scanner error:", error)
 

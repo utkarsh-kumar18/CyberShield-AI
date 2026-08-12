@@ -217,7 +217,7 @@ def detect_scam_indicators(message):
 @jwt_required()
 def scan_message():
 
-    data = request.get_json()
+    data = request.get_json(silent=True)
 
     if not data:
         return jsonify({
@@ -231,11 +231,10 @@ def scan_message():
         ""
     ).strip()
 
-
-    if not message:
+    if len(message) > 5000:
         return jsonify({
             "status": "error",
-            "message": "Message is required."
+            "message": "Message must not exceed 5000 characters."
         }), 400
 
 
@@ -379,11 +378,9 @@ def scan_message():
 
 
     except Exception as error:
+        db.session.rollback()
 
-        print(
-            "Message scanner error:",
-            error
-        )
+        print("Message scanner error:", error)
 
         return jsonify({
             "status": "error",

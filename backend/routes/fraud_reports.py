@@ -37,6 +37,12 @@ def create_report():
 
     fraud_type = data.get("fraud_type", "").strip()
     description = data.get("description", "").strip()
+    if len(description) > 2000:
+        return jsonify({
+            "status": "error",
+            "message": "Description must not exceed 2000 characters."
+        }), 400
+    
     amount = data.get("amount", 0)
     suspicious_url = data.get(
         "suspicious_url",
@@ -53,6 +59,20 @@ def create_report():
         return jsonify({
             "status": "error",
             "message": "Description is required."
+        }), 400
+
+    try:
+        amount = float(amount)
+    except (TypeError, ValueError):
+        return jsonify({
+            "status": "error",
+            "message": "Amount must be a valid number."
+        }), 400
+
+    if amount < 0:
+        return jsonify({
+            "status": "error",
+            "message": "Amount cannot be negative."
         }), 400
 
     try:
