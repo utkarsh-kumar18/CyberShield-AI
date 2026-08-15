@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./ResetPassword.css";
+import { apiFetch } from "../utils/api";
 
 function ResetPassword() {
     const [password, setPassword] = useState("");

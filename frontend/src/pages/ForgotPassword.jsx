@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./ForgotPassword.css";
+import { apiFetch } from "../utils/api";
 
 function ForgotPassword() {
     const [email, setEmail] = useState("");
