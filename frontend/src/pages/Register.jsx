@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./Register.css";
+import { apiFetch } from "../utils/api";
 
 function Register() {
     const [name, setName] = useState("");
@@ -17,22 +18,14 @@ function Register() {
         setError("");
 
         try {
-            const response = await fetch(
-                "http://127.0.0.1:5000/api/auth/register",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        name,
-                        email,
-                        password
-                    })
-                }
-            );
+            const response = await apiFetch("/api/auth/register", {
+                method: "POST",
+                body: JSON.stringify({
+                    name,
+                    email,
+                    password
+                })
+            });
 
             const data = await response.json();
 
