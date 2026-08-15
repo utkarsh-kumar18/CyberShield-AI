@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiFetch } from "..//utils/api";
 
 function ThreatAnalytics() {
 
@@ -7,30 +8,35 @@ function ThreatAnalytics() {
     const [error, setError] = useState("");
 
     useEffect(() => {
+        const loadAnalytics = async () => {
+            try {
+                const response = await apiFetch("/api/analytics/stats");
 
-        fetch("http://127.0.0.1:5000/api/analytics/stats")
+                if (!response) {
+                    return;
+                }
 
-            .then((response) => response.json())
+                const data = await response.json();
 
-            .then((data) => {
                 if (data.status === "success") {
                     setStats(data);
                 } else {
-                    setError("Unable to load analytics.");
+                    setError(
+                        data.message || "Unable to load analytics."
+                    );
                 }
-                setLoading(false);
-            })
-
-            .catch((error) => {
-                console.error(error);
+            } catch (error) {
+                console.error("Analytics error:", error);
                 setError(
                     "Unable to connect to CyberShield server."
                 );
+            } finally {
                 setLoading(false);
-            });
+            }
+        };
 
+        loadAnalytics();
     }, []);
-
 
     if (loading) {
         return (

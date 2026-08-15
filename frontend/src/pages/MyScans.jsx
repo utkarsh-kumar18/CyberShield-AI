@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiFetch } from "../utils/api";
 
 function MyScans() {
     const [scans, setScans] = useState([]);
@@ -6,25 +7,27 @@ function MyScans() {
     const [filter, setFilter] = useState("all");
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
+        const loadScans = async () => {
+            try {
+                const response = await apiFetch("/api/scan/my-scans");
 
-        fetch("http://127.0.0.1:5000/api/scan/my-scans", {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
-            .then((response) => response.json())
-            .then((data) => {
+                if (!response) {
+                    return;
+                }
+
+                const data = await response.json();
+
                 if (data.status === "success") {
                     setScans(data.scans);
                 }
-            })
-            .catch((error) => {
+            } catch (error) {
                 console.error("Failed to load scan history:", error);
-            })
-            .finally(() => {
+            } finally {
                 setLoading(false);
-            });
+            }
+        };
+
+        loadScans();
     }, []);
 
     const getResultLabel = (result) => {
@@ -82,22 +85,17 @@ function MyScans() {
 
     const handleRescan = async (scan) => {
         try {
-            const token = localStorage.getItem("token");
+            const response = await apiFetch("/api/scan/url", {
+                method: "POST",
+                body: JSON.stringify({
+                    url: scan.target,
+                    scan_id: scan.id
+                })
+            });
 
-            const response = await fetch(
-                "http://127.0.0.1:5000/api/scan/url",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        url: scan.target,
-                        scan_id: scan.id
-                    })
-                }
-            );
+            if (!response) {
+                return;
+            }
 
             const data = await response.json();
 
@@ -106,7 +104,6 @@ function MyScans() {
                 return;
             }
 
-            // Update the displayed result
             setScans((currentScans) =>
                 currentScans.map((item) =>
                     item.id === scan.id
@@ -118,10 +115,7 @@ function MyScans() {
                 )
             );
 
-            alert(
-                `Re-scan completed: ${data.status.toUpperCase()}`
-            );
-
+            alert(`Re-scan completed: ${data.status.toUpperCase()}`);
         } catch (error) {
             console.error("Re-scan error:", error);
             alert("Unable to connect to CyberShield server.");

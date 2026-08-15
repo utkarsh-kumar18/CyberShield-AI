@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify
+from flask_jwt_extended import jwt_required
 from sqlalchemy import func
 
 from extensions import db
@@ -12,6 +13,7 @@ analytics = Blueprint(
 
 
 @analytics.route("/stats", methods=["GET"])
+@jwt_required()
 def get_stats():
 
     try:

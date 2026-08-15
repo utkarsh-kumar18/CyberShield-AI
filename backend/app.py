@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_cors import CORS
 
@@ -19,7 +20,10 @@ CORS(
     app,
     resources={
         r"/api/*": {
-            "origins": "http://localhost:5173",
+            "origins": os.getenv(
+                "FRONTEND_URL",
+                "http://localhost:5173"
+            ),
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"]
         }
@@ -76,4 +80,8 @@ with app.app_context():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    import os
+
+    debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+
+    app.run(debug=debug_mode)

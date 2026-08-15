@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./MyReports.css";
+import { apiFetch } from "../utils/api";
 
 function MyReports() {
     const [reports, setReports] = useState([]);
@@ -7,23 +8,16 @@ function MyReports() {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
+        const loadReports = async () => {
+            try {
+                const response = await apiFetch("/api/fraud/my-reports");
 
-        if (!token) {
-            window.location.href = "/login";
-            return;
-        }
-
-        fetch(
-            "http://127.0.0.1:5000/api/fraud/my-reports",
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`
+                if (!response) {
+                    return;
                 }
-            }
-        )
-            .then((response) => response.json())
-            .then((data) => {
+
+                const data = await response.json();
+
                 if (data.status === "success") {
                     setReports(data.reports);
                 } else {
@@ -31,15 +25,15 @@ function MyReports() {
                         data.message || "Unable to load reports."
                     );
                 }
-
-                setLoading(false);
-            })
-            .catch((error) => {
+            } catch (error) {
                 console.error("My reports error:", error);
-
                 setError("Unable to connect to server.");
+            } finally {
                 setLoading(false);
-            });
+            }
+        };
+
+        loadReports();
     }, []);
 
     const getStatusClass = (status) => {

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./ReportFraud.css";
-
+import { apiFetch } from "../utils/api";
+ 
 function ReportFraud() {
     const [fraudType, setFraudType] = useState("");
     const [description, setDescription] = useState("");
@@ -65,26 +66,20 @@ function ReportFraud() {
         setResult(null);
 
         try {
-            const token = localStorage.getItem("token");
 
-            const response = await fetch(
-                "http://127.0.0.1:5000/api/fraud/report",
-                {
-                    method: "POST",
+            const response = await apiFetch("/api/fraud/report", {
+                method: "POST",
+                body: JSON.stringify({
+                    fraud_type: fraudType,
+                    description: description,
+                    amount: amount || 0,
+                    suspicious_url: suspiciousUrl
+                })
+            });
 
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
-                    },
-
-                    body: JSON.stringify({
-                        fraud_type: fraudType,
-                        description: description,
-                        amount: amount || 0,
-                        suspicious_url: suspiciousUrl
-                    })
-                }
-            );
+            if (!response) {
+                return;
+            }
 
             const data = await response.json();
 

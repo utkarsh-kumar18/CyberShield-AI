@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiFetch } from "../utils/api";
 
 function AdminPanel() {
 
@@ -13,38 +14,27 @@ function AdminPanel() {
     const [typeFilter, setTypeFilter] = useState("all");
     const [sortOrder, setSortOrder] = useState("newest");
 
-    const loadReports = () => {
+    const loadReports = async () => {
+        try {
+            const response = await apiFetch("/api/admin/reports");
 
-        const token = localStorage.getItem("token");
-        fetch("http://127.0.0.1:5000/api/admin/reports", {
-            headers: {
-                Authorization: `Bearer ${token}`
+            if (!response) {
+                return;
             }
-        })
 
-            .then((response) => response.json())
+            const data = await response.json();
 
-            .then((data) => {
-
-                if (data.status === "success") {
-                    setReports(data.reports);
-                } else {
-                    setError("Unable to load reports.");
-                }
-
-                setLoading(false);
-            })
-
-            .catch((error) => {
-
-                console.error(error);
-
-                setError(
-                    "Unable to connect to server."
-                );
-
-                setLoading(false);
-            });
+            if (data.status === "success") {
+                setReports(data.reports);
+            } else {
+                setError(data.message || "Unable to load reports.");
+            }
+        } catch (error) {
+            console.error("Admin reports error:", error);
+            setError("Unable to connect to server.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const filteredReports = reports
@@ -94,56 +84,46 @@ function AdminPanel() {
     );
 
     useEffect(() => {
-        loadReports();
-    }, []);
+        const loadScans = async () => {
+            try {
+                const response = await apiFetch("/api/admin/scans");
 
-    useEffect(() => {
-        const token = localStorage.getItem("token");
+                if (!response) {
+                    return;
+                }
 
-        fetch("http://127.0.0.1:5000/api/admin/scans", {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
-            .then((response) => response.json())
-            .then((data) => {
+                const data = await response.json();
+
                 if (data.status === "success") {
                     setScans(data.scans);
                 }
-            })
-            .catch((error) => {
-                console.error("Failed to load scans:", error);
-            });
+            } catch (error) {
+                console.error("Failed to load admin scans:", error);
+            }
+        };
+
+        loadScans();
     }, []);
 
-    const updateStatus = async (
-        reportId,
-        newStatus
-    ) => {
-
+    const updateStatus = async (reportId, newStatus) => {
         try {
-
-            const response = await fetch(
-                `http://127.0.0.1:5000/api/admin/reports/${reportId}`,
+            const response = await apiFetch(
+                `/api/admin/reports/${reportId}`,
                 {
                     method: "PUT",
-
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${localStorage.getItem("token")}`
-                    },
-
                     body: JSON.stringify({
                         status: newStatus
                     })
                 }
             );
 
-            const data =
-                await response.json();
+            if (!response) {
+                return;
+            }
+
+            const data = await response.json();
 
             if (response.ok) {
-
                 setReports((currentReports) =>
                     currentReports.map((report) =>
                         report.id === reportId
@@ -154,23 +134,14 @@ function AdminPanel() {
                             : report
                     )
                 );
-
             } else {
-
                 alert(data.message || "Unable to update report.");
-
             }
-
         } catch (error) {
-
-            console.error(error);
-
-            alert(
-                "Unable to update report."
-            );
+            console.error("Update report error:", error);
+            alert("Unable to update report.");
         }
     };
-
 
     if (loading) {
 

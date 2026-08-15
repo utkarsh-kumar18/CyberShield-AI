@@ -21,4 +21,12 @@ class Config:
         database=os.getenv("DB_NAME")
     )
 
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "connect_args": {
+            "ssl": {
+                "ca": os.path.join(os.path.dirname(__file__), "ca.pem")
+            }
+        }
+    }
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False

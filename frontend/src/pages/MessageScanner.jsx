@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiFetch } from "../utils/api";
 
 function MessageScanner() {
 
@@ -18,39 +19,29 @@ function MessageScanner() {
         setResult(null);
 
         try {
-            const token = localStorage.getItem("token");
+            const response = await apiFetch("/api/scan/message", {
+                method: "POST",
+                body: JSON.stringify({
+                    message: message.trim()
+                })
+            });
 
-            const response = await fetch(
-                "http://127.0.0.1:5000/api/scan/message",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        message: message.trim()
-                    })
-                }
-            );
+            if (!response) {
+                return;
+            }
 
             const data = await response.json();
-
             setResult(data);
 
         } catch (error) {
-
             console.error(error);
 
             setResult({
                 status: "error",
                 result: "Unable to connect to CyberShield server."
             });
-
         } finally {
-
             setLoading(false);
-
         }
     };
 

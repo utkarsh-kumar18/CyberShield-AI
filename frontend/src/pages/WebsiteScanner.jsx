@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiFetch } from "../utils/api";
 
 function WebsiteScanner() {
 
@@ -18,26 +19,18 @@ function WebsiteScanner() {
         setResult(null);
 
         try {
-            const token = localStorage.getItem("token")
+            const response = await apiFetch("/api/scan/url", {
+                method: "POST",
+                body: JSON.stringify({
+                    url: url.trim()
+                })
+            });
 
-            const response = await fetch(
-                "http://127.0.0.1:5000/api/scan/url",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
-                    },
-
-                    body: JSON.stringify({
-                        url: url.trim()
-                    })
-                }
-            );
+            if (!response) {
+                return;
+            }
 
             const data = await response.json();
-
             setResult(data);
 
         } catch (error) {

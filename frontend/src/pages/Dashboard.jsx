@@ -302,9 +302,7 @@ function Dashboard() {
 
                         <div
                             className="tool-card"
-                            onClick={() =>
-                                alert("Fraud reporting — coming next!")
-                            }
+                            onClick={() => navigate("/report-fraud")}
                         >
 
                             <div className="tool-icon">

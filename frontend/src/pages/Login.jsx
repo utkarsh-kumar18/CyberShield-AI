@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./Login.css";
+import { apiFetch } from "../utils/api";
 
 function Login() {
     const [email, setEmail] = useState("");
@@ -13,40 +14,23 @@ function Login() {
         setMessage("Logging in...");
 
         try {
-            const response = await fetch(
-                "http://127.0.0.1:5000/api/auth/login",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        email: email,
-                        password: password
-                    })
-                }
-            );
+            const response = await apiFetch("/api/auth/login", {
+                method: "POST",
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            });
 
             const data = await response.json();
 
-            if (response.ok) {
-                localStorage.setItem(
-                    "token",
-                    data.token
-                );
-
-                localStorage.setItem(
-                    "user",
-                    JSON.stringify(data.user)
-                );
+            if (response && response.ok) {
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("user", JSON.stringify(data.user));
 
                 window.location.href = "/dashboard";
-            } else {
-                setMessage(
-                    data.message || "Login failed"
-                );
+            } else if (response) {
+                setMessage(data.message || "Login failed");
             }
 
         } catch (error) {
