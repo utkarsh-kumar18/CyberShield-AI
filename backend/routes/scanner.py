@@ -421,7 +421,7 @@ def my_scans():
                 "scan_type": scan.scan_type,
                 "target": scan.target,
                 "result": scan.result,
-                "created_at": scan.created_at.isoformat()
+                "created_at": scan.created_at.isoformat() + "Z"
             }
             for scan in scans
         ]

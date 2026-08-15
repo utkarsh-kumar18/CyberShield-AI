@@ -162,7 +162,7 @@ def get_scans():
                 "scan_type": scan.scan_type,
                 "target": scan.target,
                 "result": scan.result,
-                "created_at": scan.created_at.isoformat()
+                "created_at": scan.created_at.isoformat() + "Z"
                     if scan.created_at else None
             })
 
