@@ -45,7 +45,7 @@ def register():
         role="citizen"
     )
 
-    db.session.add(user)
+    db.session.add(user) 
     db.session.commit()
 
     return jsonify({
@@ -87,6 +87,10 @@ def login():
             "message": "Invalid email or password"
         }), 401
 
+    if user.role != "admin":
+        user.role = "citizen"
+        db.session.commit()
+        
     access_token = create_access_token(
         identity=str(user.id)
     )
