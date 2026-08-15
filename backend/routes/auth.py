@@ -90,7 +90,7 @@ def login():
     if user.role != "admin":
         user.role = "citizen"
         db.session.commit()
-        
+
     access_token = create_access_token(
         identity=str(user.id)
     )
@@ -170,8 +170,6 @@ def reset_password():
         }), 400
 
     user = User.query.get(int(user_id))
-
-
 
     if not user:
         return jsonify({
