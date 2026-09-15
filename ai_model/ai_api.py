@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import joblib
+from pathlib import Path
 
-from security_rules import security_check
+from ai_model.security_rules import security_check
 
 app = FastAPI(
     title="CyberShield AI",
@@ -10,7 +11,8 @@ app = FastAPI(
     version="1.0"
 )
 
-model = joblib.load("model.pkl")
+BASE_DIR = Path(__file__).resolve().parent
+model = joblib.load(BASE_DIR / "model.pkl")
 
 class MessageRequest(BaseModel):
     message: str
