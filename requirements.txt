@@ -1,5 +1,10 @@
 pandas
 scikit-learn
 joblib
-fastapi
-uvicorn
+Flask
+Flask-Limiter
+waitress
+SQLAlchemy
+psycopg[binary]
+redis
+alembic
