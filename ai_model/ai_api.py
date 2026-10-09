@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import joblib
 from pathlib import Path
+from fastapi.middleware.cors import CORSMiddleware
 
 from ai_model.security_rules import security_check
 
@@ -9,6 +10,13 @@ app = FastAPI(
     title="CyberShield AI",
     description="AI-powered scam and phishing detection API",
     version="1.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
 )
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -54,6 +62,13 @@ def predict(request: MessageRequest):
 
     else:
         final_result = "SAFE"
+
+    if final_result == "SCAM / PHISHING":
+        risk_level = "HIGH"
+    elif final_result == "SUSPICIOUS":
+        risk_level = "MEDIUM"
+    else:
+        risk_level = "LOW"
 
     return {
         "message": message,
