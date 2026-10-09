@@ -31,30 +31,54 @@ function URLResult() {
           <strong>{url}</strong>
         </div>
 
+        <div className="security-score">
+  <div className="score-circle">
+    <strong>92</strong>
+    <span>/ 100</span>
+  </div>
+
+  <div>
+    <h3>Security Score</h3>
+    <p>This website has a low security risk.</p>
+  </div>
+</div>
+
         <div className="result-details">
 
-          <div>
-            <span>Phishing Risk</span>
-            <strong className="safe-text">Low</strong>
-          </div>
+  
 
-          <div>
-            <span>Malware Risk</span>
-            <strong className="safe-text">Low</strong>
-          </div>
+  <div>
+    <span>Phishing Risk</span>
+    <strong className="safe-text">Low</strong>
+  </div>
 
-          <div>
-            <span>Website Reputation</span>
-            <strong className="safe-text">Good</strong>
-          </div>
+  <div>
+    <span>Malware Risk</span>
+    <strong className="safe-text">Low</strong>
+  </div>
 
-        </div>
+  <div>
+    <span>Website Reputation</span>
+    <strong className="safe-text">Good</strong>
+  </div>
+
+  <div>
+    <span>HTTPS Security</span>
+    <strong className="safe-text">Secure</strong>
+  </div>
+
+  <div>
+    <span>Domain Status</span>
+    <strong className="safe-text">Active</strong>
+  </div>
+
+</div>
 
         <div className="result-actions">
 
           <button
             className="primary-btn"
-            onClick={() => navigate("/url-scanner")}
+            onClick={() => navigate("/url-scanner",{ replace: true })}
           >
             Scan Another URL
           </button>

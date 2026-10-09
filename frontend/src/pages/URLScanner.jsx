@@ -6,15 +6,29 @@ function URLScanner() {
 
   const [url, setUrl] = useState("");
   const [scanning, setScanning] = useState(false);
+  const [error, setError] = useState("");
 
   const handleScan = () => {
-    if (!url.trim()) return;
+  setError("");
 
-    setScanning(true);
+  if (!url.trim()) {
+    setError("Please enter a website URL.");
+    return;
+  }
 
-    setTimeout(() => {
-      setScanning(false);
-     navigate("/url-result", {
+  try {
+    new URL(url.trim());
+  } catch {
+    setError("Please enter a valid URL, such as https://example.com");
+    return;
+  }
+
+  setScanning(true);
+
+  setTimeout(() => {
+    setScanning(false);
+
+    navigate("/url-result", {
       state: {
         url: url.trim(),
       },
@@ -63,6 +77,11 @@ function URLScanner() {
           </button>
 
         </div>
+        {error && (
+          <p className="scanner-error">
+           {error}
+         </p>
+)}
 
         <div className="scanner-info">
 

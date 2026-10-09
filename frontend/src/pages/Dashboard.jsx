@@ -6,39 +6,7 @@ function Dashboard() {
   return (
     <div className="app">
 
-      {/* SIDEBAR */}
-      <aside className="sidebar">
-
-        <div className="logo">
-          🛡️ <span>CyberShield</span>
-        </div>
-
-        <nav>
-          <a className="active">Dashboard</a>
-
-          <a onClick={() => navigate("/url-scanner")}>
-            URL Scanner
-          </a>
-
-          <a onClick={() => navigate("/message-scanner")}>
-            Message Scanner
-          </a>
-
-          <a onClick={() => navigate("/report-fraud")}>
-              Report Fraud
-          </a>
-          <a onClick={() => navigate("/fraud-intelligence")}>
-             Fraud Intelligence
-          </a>
-          <a>Scan History</a>
-        </nav>
-
-        <div className="sidebar-bottom">
-          <a>Settings</a>
-          <a>Help & Support</a>
-        </div>
-
-      </aside>
+      
 
       {/* MAIN */}
       <main className="main">
