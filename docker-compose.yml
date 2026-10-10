@@ -1,24 +1,50 @@
 services:
+  migrate:
+    build: .
+    restart: "no"
+    environment:
+      CYBERSHIELD_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-cybershield}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-cybershield}
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy
+
   api:
     build: .
     restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,noexec,nosuid
     environment:
       CYBERSHIELD_ENV: production
+      HOST: 0.0.0.0
+      CYBERSHIELD_TRUSTED_PROXY_HOPS: ${CYBERSHIELD_TRUSTED_PROXY_HOPS:-0}
       CYBERSHIELD_SECRET_KEY: ${CYBERSHIELD_SECRET_KEY:?Set CYBERSHIELD_SECRET_KEY in .env}
       CYBERSHIELD_ADMIN_API_KEY: ${CYBERSHIELD_ADMIN_API_KEY:?Set CYBERSHIELD_ADMIN_API_KEY in .env}
-      CYBERSHIELD_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      CYBERSHIELD_RATE_LIMIT_STORAGE_URI: redis://:${REDIS_PASSWORD}@redis:6379/0
+      CYBERSHIELD_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-cybershield}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-cybershield}
+      CYBERSHIELD_RATE_LIMIT_STORAGE_URI: redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}@redis:6379/0
       GOOGLE_SAFE_BROWSING_API_KEY: ${GOOGLE_SAFE_BROWSING_API_KEY:-}
       VIRUSTOTAL_API_KEY: ${VIRUSTOTAL_API_KEY:-}
       WAITRESS_THREADS: ${WAITRESS_THREADS:-8}
     ports:
-      - "${API_PORT:-5000}:5000"
+      - "127.0.0.1:${API_PORT:-5000}:5000"
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
-    command: ["sh", "-c", "alembic upgrade head && python -m backend.app"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/api/health/ready', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
 
   db:
     image: postgres:16-alpine
@@ -34,6 +60,11 @@ services:
       interval: 5s
       timeout: 3s
       retries: 12
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
 
   redis:
     image: redis:7-alpine
@@ -44,10 +75,15 @@ services:
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli -a '$${REDIS_PASSWORD}' ping | grep -q PONG"]
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep -q PONG"]
       interval: 5s
       timeout: 3s
       retries: 12
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
 
 volumes:
   postgres_data:

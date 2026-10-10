@@ -10,6 +10,7 @@ from sqlalchemy import (
     Index,
     Integer,
     MetaData,
+    Numeric,
     String,
     Table,
     Text,
@@ -40,6 +41,20 @@ reports = Table(
 )
 Index("reports_created_at_idx", reports.c.created_at)
 Index("reports_user_id_idx", reports.c.user_id)
+
+incident_reports = Table(
+    "incident_reports",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("user_id", Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+    Column("fraud_type", String(40), nullable=False),
+    Column("description", Text, nullable=False),
+    Column("website", String(2048)),
+    Column("contact", String(80)),
+    Column("amount_lost", Numeric(14, 2)),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+)
+Index("incident_reports_user_created_idx", incident_reports.c.user_id, incident_reports.c.created_at)
 
 
 def create_database_engine(database_url: str | URL | None, fallback_path: str):
