@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import Sidebar from "./components/Sidebar";
 
@@ -15,25 +16,37 @@ import HelpSupport from "./pages/HelpSupport";
 import Account from "./pages/Account";
 import { AuthProvider } from "./auth/AuthContext";
 
+function AppLayout() {
+  const location = useLocation();
+  const isAccountPage = location.pathname === "/account";
+
+  return (
+    <>
+      {!isAccountPage && <Sidebar />}
+
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/account" element={<Account />} />
+        <Route path="/url-scanner" element={<URLScanner />} />
+        <Route path="/scan-history" element={<ScanHistory />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/help-support" element={<HelpSupport />} />
+        <Route path="/url-result" element={<URLResult />} />
+        <Route path="/message-scanner" element={<MessageScanner />} />
+        <Route path="/message-result" element={<MessageResult />} />
+        <Route path="/report-fraud" element={<ReportFraud />} />
+        <Route path="/fraud-intelligence" element={<FraudIntelligence />} />
+        <Route path="*" element={<Dashboard />} />
+      </Routes>
+    </>
+  );
+}
+
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Sidebar />
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/account" element={<Account />} />
-          <Route path="/url-scanner" element={<URLScanner />} />
-          <Route path="/scan-history" element={<ScanHistory />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/help-support" element={<HelpSupport />} />
-          <Route path="/url-result" element={<URLResult />} />
-          <Route path="/message-scanner" element={<MessageScanner />} />
-          <Route path="/message-result" element={<MessageResult />} />
-          <Route path="/report-fraud" element={<ReportFraud />} />
-          <Route path="/fraud-intelligence" element={<FraudIntelligence />} />
-          <Route path="*" element={<Dashboard />} />
-        </Routes>
+        <AppLayout />
       </BrowserRouter>
     </AuthProvider>
   );
