@@ -6,6 +6,8 @@ import secrets
 from pathlib import Path
 from uuid import uuid4
 
+from flask_cors import CORS
+
 from flask import Flask, g, jsonify, request, send_from_directory
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -21,6 +23,19 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 def create_app(config: dict | None = None) -> Flask:
     frontend_dist = PROJECT_ROOT / "frontend" / "dist"
     app = Flask(__name__, static_folder=None)
+    CORS(
+        app,
+        resources={
+            r"/api/*": {
+                "origins": [
+                    "http://127.0.0.1:5173",
+                    "http://localhost:5173"
+                ]
+            }
+        },
+        allow_headers=["Content-Type", "Authorization"],
+        methods=["GET", "POST", "OPTIONS"]
+    )
     app.config.from_mapping(
         SECRET_KEY=os.getenv("CYBERSHIELD_SECRET_KEY") or secrets.token_hex(32),
         ADMIN_API_KEY=os.getenv("CYBERSHIELD_ADMIN_API_KEY"),

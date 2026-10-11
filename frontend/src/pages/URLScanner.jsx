@@ -85,7 +85,7 @@ function URLScanner() {
 
           <button
             type="submit"
-            disabled={scanning}
+            disabled={scanning || !url.trim()}
           >
             {scanning ? "Scanning..." : "Scan URL"}
           </button>
